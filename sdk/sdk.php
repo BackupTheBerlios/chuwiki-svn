@@ -114,7 +114,7 @@ function FileNameEncode($strFileName)
 
 function Error($strMessage)
 {
-    header('Content-Type: text/html;charset=utf-8');
+    header('Content-Type: text/html;charset=UTF-8');
 	echo '<h1>Error</h1>' . "\n";
 	echo '<p>' . $strMessage . '</p>';
 	exit();
@@ -659,7 +659,7 @@ function GetSpecialContent($strPage)
 
 function WriteXhtmlHeader()
 {
-	$strCharset = 'utf-8';
+	$strCharset = 'UTF-8';
 
 	header("Expires: Thu, 1 Jan 1970 00:00:00 GMT");             // Date du passé
 	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // toujours modifié
