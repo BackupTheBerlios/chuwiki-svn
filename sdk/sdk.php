@@ -24,9 +24,9 @@
 
 error_reporting(E_ALL);
 
-require('wiki2xhtml/class.wiki2xhtml.php');
-require('WikiRenderer/WikiRenderer.lib.php');
-require('WikiRenderer/WikiRenderer_chu.conf.php');
+require(dirname(__FILE__) . '/wiki2xhtml/class.wiki2xhtml.php');
+require(dirname(__FILE__) . '/WikiRenderer/WikiRenderer.lib.php');
+require(dirname(__FILE__) . '/WikiRenderer/WikiRenderer_chu.conf.php');
 
 // Les fonctions d'ouverture de fichier doivent utiliser ou non 
 // la zlib selon que celle-ci est présente ou pas
@@ -42,6 +42,10 @@ if ( function_exists('gzfile') ) // zlib disponible
 	$ChuWrite = 'gzwrite';
 	$ChuClose = 'gzclose';
 	$k_strExtension = 'gz';
+
+	// Active la compression du contenu
+	ob_start('ob_gzhandler');
+
 }
 ///////////////////////////////////////////////////////////////////
 
@@ -338,7 +342,7 @@ function Render($strWikiContent)
 	$formatter = null;
 	if( file_exists($strFileFormat) )
 	{
-		include($strFileFormat);
+		require(dirname(__FILE__) . '/../' . $strFileFormat);
 
 		if( class_exists('CLanguageFormat') )
 		{
@@ -383,7 +387,7 @@ function Render($strWikiContent)
 
 	if ( $k_aConfig['SmileyPath'] != '' )
 	{
-		require('smiley-replacer.php');
+		require(dirname(__FILE__) . '/smiley-replacer.php');
 		MakeImageSmileys($strHtmlContent);
 	}
 

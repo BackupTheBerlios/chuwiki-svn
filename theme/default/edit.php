@@ -23,7 +23,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="&Lang.Code;" xml:lang="&Lang.Code;">
 <head>
 <title>&Config.Title; &Lang.EditTitle; &Page.Name;</title>
 <meta name="robots" content="noindex,nofollow"/>
@@ -44,7 +44,7 @@
 <div>
 <textarea id="Wiki" name="Wiki" cols="80" rows="20">&Page.Wiki;</textarea>
 </div>
-<p id="PPreviewSave"><input type="submit" id="Preview" name="Preview" value="&Lang.Preview;"/><input type="submit" id="Save" name="Save" value="&Lang.Save;"/></p>
+<p id="PPreviewSave"><input type="submit" id="Preview" name="Preview" value="&Lang.Preview;" accesskey="p"/><input type="submit" id="Save" name="Save" value="&Lang.Save;" accesskey="s"/></p>
 </form>
 
 <div id="Rules">
