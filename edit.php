@@ -85,7 +85,7 @@ $strContent = LoadTemplate('edit');
 $astrReplacements = BuildStandardReplacements();
 
 // Ajoute les remplacements « runtime »
-AddReplacement($astrReplacements, 'Page.Name', htmlentities($strPage));
+AddReplacement($astrReplacements, 'Page.Name', htmlspecialchars($strPage));
 AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
 AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
 

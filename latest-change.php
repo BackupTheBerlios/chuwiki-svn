@@ -59,7 +59,7 @@ $aEntries = array();
 foreach($astrLatestChanges as $strPage => $strDate)
 {
 		$entry = array();
-		$entry['page'] = $strPage;
+		$entry['page'] = htmlspecialchars($strPage);
 		$entry['link'] = $strDomain . GetScriptURI('Wiki') . rawurlencode($strPage);
 		$entry['date'] = FormatLongIso8601Date($strDate);
 		$aEntries[] = $entry;
