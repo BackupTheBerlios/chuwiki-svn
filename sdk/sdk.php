@@ -56,10 +56,16 @@ if ( $k_strWikiURI == '//' || $k_strWikiURI == './' )
 
 $k_aConfig = ParseIniFile('configuration.ini');
 $k_aThemeConfig = ParseIniFile($k_aConfig['ThemePath'] . '/' . 'theme.ini');
+$k_aLangConfig = ParseIniFile($k_aConfig['LanguagePath'] . '/' . 'lang.ini');
 
 ///////////////////////////////////////////////////////////////////
 function ParseIniFile($strFileName)
 {
+	if( !file_exists($strFileName) )
+	{
+		Error('Missing configuration file ' . $strFileName);
+	}
+	
 	$strContent = LoadFile($strFileName);
 	$astrLines = explode("\n", $strContent);
 
@@ -321,11 +327,11 @@ function GetSavedWikiContent($strPage, $strDate)
 
 function Render($strWikiContent)
 {
-	global $k_aConfig, $k_aThemeConfig;
+	global $k_aConfig, $k_aLangConfig;
 
 	if ( $strWikiContent == '' )
 	{
-		$strWikiContent = $k_aThemeConfig['NoWikiContent'];
+		$strWikiContent = $k_aLangConfig['NoWikiContent'];
 	}
 	
 	// Instanciation de la lib de rendu et rendu wiki
@@ -405,7 +411,7 @@ function LoadTemplate($strTemplate)
 
 function BuildStandardReplacements()
 {
-	global $k_aConfig, $k_aThemeConfig, $k_strVersion, $k_strWikiURI;
+	global $k_aConfig, $k_aThemeConfig, $k_aLangConfig, $k_strVersion, $k_strWikiURI;
 
 	$astrReplacements = array('Vars' => array(), 'Values' => array());
 
@@ -422,11 +428,18 @@ function BuildStandardReplacements()
 	AddReplacement($astrReplacements, 'Config.WikiURI', GetScriptURI('Wiki'));
 	AddReplacement($astrReplacements, 'Config.EditURI', GetScriptURI('Edit'));
 	AddReplacement($astrReplacements, 'Config.HistoryURI', GetScriptURI('History'));
+	AddReplacement($astrReplacements, 'Config.Rules', LoadFile($k_aConfig['LanguagePath'] . '/rules.html'));
 
 	// Ajout des variables du template
 	foreach($k_aThemeConfig as $strVar => $strValue)
 	{
 		AddReplacement($astrReplacements, 'Theme.' . $strVar, $strValue);
+	}
+	
+	// Ajout des variables da la langue
+	foreach($k_aLangConfig as $strVar => $strValue)
+	{
+		AddReplacement($astrReplacements, 'Lang.' . $strVar, $strValue);
 	}
 	
 	return $astrReplacements;
