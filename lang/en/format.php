@@ -11,9 +11,9 @@ class CLanguageFormat
 		$strSpaces = '['.chr(0x20).chr(0xa0).chr(0x0a).',.(){}<>]';
 		$astrSources = array(
 			// Nombre ordinaux
-			'/('.$strSpaces.')([0123456789]*1)st(s?)('.$strSpaces.')/',
-			'/('.$strSpaces.')([0123456789]*2)nd(s?)('.$strSpaces.')/',
-			'/('.$strSpaces.')([0123456789]*[03456789])th(s?)('.$strSpaces.')/',
+			'/('.$strSpaces.')([0123456789]*1)st(s?)(?='.$strSpaces.')/',
+			'/('.$strSpaces.')([0123456789]*2)nd(s?)(?='.$strSpaces.')/',
+			'/('.$strSpaces.')([0123456789]*[03456789])th(s?)(?='.$strSpaces.')/',
 		);
 		$astrDestinations = array(
 			// Nombre ordinaux

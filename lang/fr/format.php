@@ -11,10 +11,10 @@ class CLanguageFormat
 		$strSpaces = '['.chr(0x20).chr(0xa0).chr(0x0a).',.(){}<>]';
 		$astrSources = array(
 			// Nombre ordinaux
-			'/('.$strSpaces.')1(er|re)(s?)('.$strSpaces.')/',
-			'/('.$strSpaces.')2nd(e?)(s?)('.$strSpaces.')/',
-			'/('.$strSpaces.')([23456789])e(s?)('.$strSpaces.')/',
-			'/('.$strSpaces.')([0123456789]{2,})e(s?)('.$strSpaces.')/',
+			'/('.$strSpaces.')1(er|re)(s?)(?='.$strSpaces.')/',
+			'/('.$strSpaces.')2nd(e?)(s?)(?='.$strSpaces.')/',
+			'/('.$strSpaces.')([23456789])e(s?)(?='.$strSpaces.')/',
+			'/('.$strSpaces.')([0123456789]{2,})e(s?)(?='.$strSpaces.')/',
 	
 			// Espace insécables
 			'/ (!|\?|:|;|»)/', 
