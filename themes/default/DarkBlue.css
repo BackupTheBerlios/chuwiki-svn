@@ -25,13 +25,13 @@
 html
 {
 	background: #369;
-	font-family: Helvetica, sans-serif;
+	font-family: Trebuchet MS, Verdana, sans-serif;
 	margin: 0;
 	padding: 0;
 }
 input
 {
-	font-family: Helvetica, sans-serif;
+	font-family: Trebuchet MS, Verdana, sans-serif;
 	font-size: 1em;
 }
 
@@ -125,6 +125,19 @@ form
 {
 	border: 1px solid #000;
 	margin: 1em;
+}
+
+pre
+{
+	background: #def;
+	border: 1px solid #369;
+	padding: 0.5em 1ex;
+	overflow: auto;
+}
+
+code
+{
+	color: #369;
 }
 
 textarea, select
