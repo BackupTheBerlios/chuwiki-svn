@@ -24,9 +24,15 @@
 
 function ParseSmileyFile($strFileName)
 {
+	// Chargement du fichier des smileys
 	$strContent = LoadFile($strFileName);
-	$astrLines = explode("\n", $strContent);
 
+	// Les smileys sont traités au niveau HTML, il faut donc convertir 
+	// les caractères spéciaux éventuels
+	$strContent = htmlspecialchars($strContent);
+
+	// On va parser les lignes une par une
+	$astrLines = explode("\n", $strContent);
 	$aVars = array();
 
 	foreach($astrLines as $strLine)

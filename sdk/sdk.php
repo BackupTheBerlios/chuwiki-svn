@@ -55,6 +55,7 @@ if ( $k_strWikiURI == '//' || $k_strWikiURI == './' )
 }
 
 $k_aConfig = ParseIniFile('configuration.ini');
+$k_aThemeConfig = ParseIniFile($k_aConfig['ThemePath'] . '/' . 'theme.ini');
 
 ///////////////////////////////////////////////////////////////////
 function ParseIniFile($strFileName)
@@ -121,7 +122,7 @@ function Error($strMessage)
 
 function GetCurrentPage()
 {
-	global $k_aConfig, $k_strWikiURI;
+	global $k_aConfig, $k_aThemeConfig, $k_strWikiURI;
 
 	$strPage = '';
 	
@@ -137,7 +138,7 @@ function GetCurrentPage()
 	// Si la page n'est pas spécifiée, on redirige vers la page par défaut
 	if ( $strPage == '' )
 	{
-		header('Location: ' . $_SERVER["SCRIPT_NAME"] . GetPageSeparator() . $k_aConfig['DefaultPage']);
+		header('Location: ' . $_SERVER["SCRIPT_NAME"] . GetPageSeparator() . $k_aThemeConfig['DefaultPage']);
 		exit();
 	}
 
@@ -320,11 +321,11 @@ function GetSavedWikiContent($strPage, $strDate)
 
 function Render($strWikiContent)
 {
-	global $k_aConfig;
+	global $k_aConfig, $k_aThemeConfig;
 
 	if ( $strWikiContent == '' )
 	{
-		$strWikiContent = $k_aConfig['NoWikiContent'];
+		$strWikiContent = $k_aThemeConfig['NoWikiContent'];
 	}
 	
 	// Instanciation de la lib de rendu et rendu wiki
@@ -404,15 +405,17 @@ function LoadTemplate($strTemplate)
 
 function BuildStandardReplacements()
 {
-	global $k_aConfig, $k_strVersion, $k_strWikiURI;
+	global $k_aConfig, $k_aThemeConfig, $k_strVersion, $k_strWikiURI;
 
 	$astrReplacements = array('Vars' => array(), 'Values' => array());
 
+	// Ajout des variables du fichier configuration.ini
 	foreach($k_aConfig as $strVar => $strValue)
 	{
 		AddReplacement($astrReplacements, 'Config.' . $strVar, $strValue);
 	}
-	
+
+	// Ajout des variables de configurations supplémentaires
 	AddReplacement($astrReplacements, 'Config.URI', $k_strWikiURI);
 	AddReplacement($astrReplacements, 'Config.Version', $k_strVersion);
 	AddReplacement($astrReplacements, 'Config.PageSeparator', GetPageSeparator());
@@ -420,6 +423,12 @@ function BuildStandardReplacements()
 	AddReplacement($astrReplacements, 'Config.EditURI', GetScriptURI('Edit'));
 	AddReplacement($astrReplacements, 'Config.HistoryURI', GetScriptURI('History'));
 
+	// Ajout des variables du template
+	foreach($k_aThemeConfig as $strVar => $strValue)
+	{
+		AddReplacement($astrReplacements, 'Theme.' . $strVar, $strValue);
+	}
+	
 	return $astrReplacements;
 }
 
@@ -629,18 +638,18 @@ function GetRecentChangeContent()
 
 function GetSpecialContent($strPage)
 {
-	global $k_aConfig;
+	global $k_aThemeConfig;
 
 	$strSpecial = '';
 
 	// Si c'est la page de listage, on ajoute la liste après.
-	if ( $strPage == $k_aConfig['ListPage'] )
+	if ( $strPage == $k_aThemeConfig['ListPage'] )
 	{
 		$strSpecial .= GetPageListContent();
 	}
 
 	// Si c'est la page de changement, on les ajoute après
-	if ( $strPage == $k_aConfig['ChangesPage'] )
+	if ( $strPage == $k_aThemeConfig['ChangesPage'] )
 	{
 		$strSpecial .= GetRecentChangeContent();
 	}

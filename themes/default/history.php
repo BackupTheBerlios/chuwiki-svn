@@ -52,9 +52,9 @@
 
 <hr id="UtilsSeparator"/>
 <ul id="Utils">
-	<li><a href="&Config.WikiURI;&Config.DefaultPage;">&Config.DefaultPage;</a></li>
-	<li><a href="&Config.WikiURI;&Config.ListPage;">&Config.ListPage;</a></li>
-	<li><a href="&Config.WikiURI;&Config.ChangesPage;">&Config.ChangesPage;</a></li>
+	<li><a href="&Config.WikiURI;&Theme.DefaultPage;">&Theme.DefaultPage;</a></li>
+	<li><a href="&Config.WikiURI;&Theme.ListPage;">&Theme.ListPage;</a></li>
+	<li><a href="&Config.WikiURI;&Theme.ChangesPage;">&Theme.ChangesPage;</a></li>
 	<li><a href="&Config.EditURI;&Page.Name;#Wiki">Éditer cette page</a></li>
 	<li><a href="&Config.WikiURI;&Page.Name;">Retour à la page</a></li>
 </ul>
