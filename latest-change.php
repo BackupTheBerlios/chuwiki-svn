@@ -37,7 +37,7 @@ function FormatRfc1123Date($strDate)
 	return gmdate('D, d M Y H:i:s', $date) . ' GMT';
 }
 
-function FormatIsoShort8601Date($strDate)
+function FormatLongIso8601Date($strDate)
 {
 	$strYear = substr($strDate, 0, 4);
 	$strMonth = substr($strDate, 4, 2);
@@ -46,37 +46,75 @@ function FormatIsoShort8601Date($strDate)
 	$strMinute = substr($strDate, 10, 2);
 	$strSecond = substr($strDate, 12, 2);
 	$date = mktime($strHour, $strMinute, $strSecond, $strMonth, $strDay, $strYear);
-	return date('Y-m-d H:i:s', $date);
+	return date('Y-m-d\TH:i:s', $date);
 }
 
 $astrLatestChanges = GetLatestChangePageList();
 $strLatestDate = reset($astrLatestChanges);
-$strURI = 'http://' . $_SERVER['SERVER_NAME'] . $k_strWikiURI;
+
+$strDomain = 'http://' . $_SERVER['SERVER_NAME'];
+$strURI = $strDomain . $k_strWikiURI;
+
+$aEntries = array();
+foreach($astrLatestChanges as $strPage => $strDate)
+{
+		$entry = array();
+		$entry['page'] = $strPage;
+		$entry['link'] = $strDomain . GetScriptURI('Wiki') . rawurlencode($strPage);
+		$entry['date'] = FormatLongIso8601Date($strDate);
+		$aEntries[] = $entry;
+}
 
 header('Content-Type: application/xml; charset=UTF-8');
 echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 ////////////////////////////////////////////////////////////////////////////////
 ?>
-<rss version="2.0">
-	<channel>
-		<title>ChuWiki - Changements récents</title>
-		<link><?php echo $strURI ?></link>
-		<description></description>
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+  xmlns:admin="http://webns.net/mvcb/"
+  xmlns="http://purl.org/rss/1.0/">
 
-		<lastBuildDate><?php echo FormatRfc1123Date($strLatestDate) ?></lastBuildDate>
-
+<channel rdf:about="<?php echo $strURI ?>">
+	<title><?php echo $k_aConfig['Title'] . ' - ' . $k_aLangConfig['ChangesPage'] ?></title>
+	<description><![CDATA[]]></description>
+	<link><?php echo $strURI ?></link>
 <?php
-foreach($astrLatestChanges as $strPage => $strDate)
+	$strDate = FormatLongIso8601Date($strLatestDate);
+?>
+	<dc:date><?php echo $strDate ?></dc:date>
+	<admin:generatorAgent rdf:resource="http://chuwiki.berlios.de/" />
+
+	<sy:updatePeriod>daily</sy:updatePeriod>
+	<sy:updateFrequency>1</sy:updateFrequency>
+	<sy:updateBase><?php echo $strDate ?></sy:updateBase>
+
+	<items>
+	<rdf:Seq>
+<?php
+foreach($aEntries as $entry)
 {
 ?>
-		<item>
-			<title><?php echo $strPage ?></title>
-			<link><?php echo $strURI ?>/wiki/<?php echo rawurlencode($strPage) ?></link>
-			<pubDate><?php echo FormatRfc1123Date($strDate) ?></pubDate>
-			<dc:date><?php echo FormatIsoShort8601Date($strDate) ?></dc:date>
-		</item>
+		<rdf:li rdf:resource="<?php echo $entry['link'] ?>" />
 <?php
 }
 ?>
-   </channel>
-</rss>
+	</rdf:Seq>
+	</items>
+</channel>
+
+<?php
+foreach($aEntries as $entry)
+{
+?>
+<item rdf:about="<?php echo $entry['link'] ?>">
+  <title><?php echo $entry['page'] ?></title>
+  <link><?php echo $entry['link'] ?></link>
+  <dc:date><?php echo $entry['date'] ?></dc:date>
+</item>
+
+<?php
+}
+?>
+</rdf:RDF>

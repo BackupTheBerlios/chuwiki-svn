@@ -105,22 +105,15 @@ function GetPathInfo()
 	// Sans PathInfo
 	if( $k_aConfig['UsePathInfo'] != 'true' )
 	{
-		$strPathInfo = urldecode($_SERVER['QUERY_STRING']);
+		$strPage = urldecode($_SERVER['QUERY_STRING']);
 	}
 	// Avec PathInfo
-	else
+	else if ( isset($_SERVER['PATH_INFO']) )
 	{
-		if ( isset($_SERVER['PATH_INFO']) )
-		{
-			$strPathInfo = substr($_SERVER['PATH_INFO'], 1);
-		}
+		$strPage = substr($_SERVER['PATH_INFO'], 1);
 	}
 
-	$strPathInfo = str_replace('&', '&amp;', $strPathInfo);
-
-	$astrSrc = array('<', '>');
-	$astrDst = array('&lt;', '&gt;');
-	return str_replace($astrSrc, $astrDst, $strPathInfo);
+	return $strPage;
 }
 
 function FileNameEncode($strFileName)
