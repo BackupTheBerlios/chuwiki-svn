@@ -48,7 +48,7 @@
 </form>
 
 <div id="Rules">
-&Config.Rules;
+&Lang.Rules;
 </div>
 
 <hr id="UtilsSeparator"/>

@@ -431,13 +431,15 @@ function BuildStandardReplacements()
 	AddReplacement($astrReplacements, 'Config.WikiURI', GetScriptURI('Wiki'));
 	AddReplacement($astrReplacements, 'Config.EditURI', GetScriptURI('Edit'));
 	AddReplacement($astrReplacements, 'Config.HistoryURI', GetScriptURI('History'));
-	AddReplacement($astrReplacements, 'Config.Rules', LoadFile($k_aConfig['LanguagePath'] . '/rules.html'));
 
 	// Ajout des variables da la langue
 	foreach($k_aLangConfig as $strVar => $strValue)
 	{
 		AddReplacement($astrReplacements, 'Lang.' . $strVar, $strValue);
 	}
+
+	// Ajout des variables de langue supplémentaires
+	AddReplacement($astrReplacements, 'Lang.Rules', LoadFile($k_aConfig['LanguagePath'] . '/rules.html'));
 	
 	return $astrReplacements;
 }

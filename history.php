@@ -103,7 +103,7 @@ $astrReplacements = BuildStandardReplacements();
 
 // Ajoute les remplacements « runtime »
 AddReplacement($astrReplacements, 'Page.Name', $strPage);
-//AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
+AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
 AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
 AddReplacement($astrReplacements, 'Page.History', $strHistory);
 
