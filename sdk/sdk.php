@@ -62,7 +62,7 @@ function ParseIniFile($strFileName)
 {
 	if( !file_exists($strFileName) )
 	{
-		Error('Missing configuration file ' . $strFileName);
+		Error('Fichier de configuration manquant ' . $strFileName);
 	}
 	
 	$strContent = LoadFile($strFileName);
@@ -332,6 +332,26 @@ function Render($strWikiContent)
 	{
 		$strWikiContent = $k_aLangConfig['NoWikiContent'];
 	}
+
+	// On utilise le fichier de formatage de la langue s'il existe	
+	$strFileFormat = $k_aConfig['LanguagePath'] . '/format.php';
+	$formatter = null;
+	if( file_exists($strFileFormat) )
+	{
+		include($strFileFormat);
+
+		if( class_exists('CLanguageFormat') )
+		{
+			$formatter = new CLanguageFormat();
+		}
+	}
+	
+	// Modification du contenu wiki par la langue
+	if(	is_a($formatter, 'CLanguageFormat') )
+	{
+		$strWikiContent = $formatter->FormatWiki($strWikiContent);
+		echo "wiki modiifié";
+	}
 	
 	// Instanciation de la lib de rendu et rendu wiki
 	switch($k_aConfig['Renderer'])
@@ -368,31 +388,13 @@ function Render($strWikiContent)
 		MakeImageSmileys($strHtmlContent);
 	}
 
-	$strSpaces = '['.chr(0x20).chr(0xa0).chr(0x0a).',(){}<>]';
-	$astrSources = array(
-		// Nombre ordinaux
-		'/('.$strSpaces.')1(er|re)(s?)('.$strSpaces.')/',
-		'/('.$strSpaces.')2nd(e?)(s?)('.$strSpaces.')/',
-		'/('.$strSpaces.')([23456789])e(s?)('.$strSpaces.')/',
-		'/('.$strSpaces.')([0123456789]{2,})e(s?)('.$strSpaces.')/',
-
-		// Espace insécables
-		'/ (!|\?|:|;|»)/', 
-		'/(«) /'
-	);
-	$astrDestinations = array(
-		// Nombre ordinaux
-		'${1}1<sup>$2$3</sup>$4',
-		'${1}2<sup>nd$2$3</sup>$4',
-		'$1$2<sup>e$3</sup>$4',
-		'$1$2<sup>e$3</sup>$4',
-
-		// Espace insécables
-		' $1',
-		'$1 '
-	);
-	$strHtmlContent = preg_replace($astrSources, $astrDestinations, $strHtmlContent);
-
+	// Modification du contenu HTML par la langue
+	if(	is_a($formatter, 'CLanguageFormat') )
+	{
+		$strHtmlContent = $formatter->FormatHtml($strHtmlContent);
+		echo "html modifié";
+	}
+	
 	return $strHtmlContent;
 }
 
