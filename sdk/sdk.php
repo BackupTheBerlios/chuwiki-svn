@@ -350,7 +350,6 @@ function Render($strWikiContent)
 	if(	is_a($formatter, 'CLanguageFormat') )
 	{
 		$strWikiContent = $formatter->FormatWiki($strWikiContent);
-		echo "wiki modiifié";
 	}
 	
 	// Instanciation de la lib de rendu et rendu wiki
@@ -392,7 +391,6 @@ function Render($strWikiContent)
 	if(	is_a($formatter, 'CLanguageFormat') )
 	{
 		$strHtmlContent = $formatter->FormatHtml($strHtmlContent);
-		echo "html modifié";
 	}
 	
 	return $strHtmlContent;

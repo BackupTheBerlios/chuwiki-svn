@@ -72,7 +72,7 @@ foreach($astrLatestChanges as $strPage => $strDate)
 		<item>
 			<title><?php echo $strPage ?></title>
 			<link><?php echo $strURI ?>/wiki/<?php echo rawurlencode($strPage) ?></link>
-			<!--<pubDate><?php echo FormatRfc1123Date($strDate) ?></pubDate>-->
+			<pubDate><?php echo FormatRfc1123Date($strDate) ?></pubDate>
 			<dc:date><?php echo FormatIsoShort8601Date($strDate) ?></dc:date>
 		</item>
 <?php
