@@ -96,11 +96,15 @@ function ParseIniFile($strFileName)
 }
 
 
-function GetPathInfo()
+function GetUriInfo()
 {
 	global $k_aConfig;
 
-	$strPathInfo = '';
+	$strPage = '';
+
+	// L'URI peut être composée de 3 parties :
+	// le script, le séparateur de page, et la page
+	// Il faut extraire le script et la page	
 
 	// Sans PathInfo
 	if( $k_aConfig['UsePathInfo'] != 'true' )
@@ -113,7 +117,18 @@ function GetPathInfo()
 		$strPage = substr($_SERVER['PATH_INFO'], 1);
 	}
 
-	return $strPage;
+	$nStart = strrpos($_SERVER['REQUEST_URI'], $strPage);
+	$strScript = substr($_SERVER['REQUEST_URI'], 0, $nStart);
+
+	$strSeparator = GetPageSeparator();
+	$nSeparatorLength = strlen($strSeparator);
+	if( substr($strScript, -$nSeparatorLength) != $strSeparator )
+	{
+		// Il n'y a pas de séparateur à la fin du script, on l'ajoutex
+		$strScript .= $strSeparator;
+	}
+	
+	return array('Page' => $strPage, 'Script' => $strScript);
 }
 
 function FileNameEncode($strFileName)
@@ -130,6 +145,16 @@ function Error($strMessage)
 	exit();
 }
 
+function GetScriptName()
+{
+	$strScript = $_SERVER["REQUEST_URI"];
+	$nScriptEnd = strrpos($strScript, GetPageSeparator());
+	$strScript = substr($strScript, 0, $nScriptEnd);
+	echo $strScript;
+	exit();
+	return $strScript;
+}
+
 function GetCurrentPage()
 {
 	global $k_aConfig, $k_aLangConfig, $k_strWikiURI;
@@ -137,7 +162,9 @@ function GetCurrentPage()
 	$strPage = '';
 	
 	// R√©cup√®re la page demand√©e
-	$strPage = GetPathInfo();
+	$aInfo = GetUriInfo();
+	$strPage = $aInfo['Page'];
+	$strScript = $aInfo['Script'];
 
 	// Gestion de magic_quotes
 	if ( get_magic_quotes_gpc() )
@@ -148,7 +175,7 @@ function GetCurrentPage()
 	// Si la page n'est pas sp√©cifi√©e, on redirige vers la page par d√©faut
 	if ( $strPage == '' )
 	{
-		header('Location: ' . $_SERVER["SCRIPT_NAME"] . GetPageSeparator() . $k_aLangConfig['DefaultPage']);
+		header('Location: ' . $strScript . $k_aLangConfig['DefaultPage']);
 		exit();
 	}
 
@@ -156,7 +183,9 @@ function GetCurrentPage()
 	if ( strstr($strPage, '/') !== FALSE || strstr($strPage, '"') !== FALSE )
 	{
 		$aBads = array('/', '"');
-		header('Location: ' . $_SERVER["SCRIPT_NAME"] . GetPageSeparator() . str_replace($aBads, '-', $strPage) );
+		$strPage = str_replace($aBads, '-', $strPage);
+	
+		header('Location: ' . $strScript .  $strPage);
 		exit();
 	}
 
