@@ -128,7 +128,7 @@ function Error($strMessage)
 
 function GetCurrentPage()
 {
-	global $k_aConfig, $k_aThemeConfig, $k_strWikiURI;
+	global $k_aConfig, $k_aLangConfig, $k_strWikiURI;
 
 	$strPage = '';
 	
@@ -144,7 +144,7 @@ function GetCurrentPage()
 	// Si la page n'est pas spécifiée, on redirige vers la page par défaut
 	if ( $strPage == '' )
 	{
-		header('Location: ' . $_SERVER["SCRIPT_NAME"] . GetPageSeparator() . $k_aThemeConfig['DefaultPage']);
+		header('Location: ' . $_SERVER["SCRIPT_NAME"] . GetPageSeparator() . $k_aLangConfig['DefaultPage']);
 		exit();
 	}
 
@@ -651,18 +651,18 @@ function GetRecentChangeContent()
 
 function GetSpecialContent($strPage)
 {
-	global $k_aThemeConfig;
+	global $k_aLangConfig;
 
 	$strSpecial = '';
 
 	// Si c'est la page de listage, on ajoute la liste après.
-	if ( $strPage == $k_aThemeConfig['ListPage'] )
+	if ( $strPage == $k_aLangConfig['ListPage'] )
 	{
 		$strSpecial .= GetPageListContent();
 	}
 
 	// Si c'est la page de changement, on les ajoute après
-	if ( $strPage == $k_aThemeConfig['ChangesPage'] )
+	if ( $strPage == $k_aLangConfig['ChangesPage'] )
 	{
 		$strSpecial .= GetRecentChangeContent();
 	}
