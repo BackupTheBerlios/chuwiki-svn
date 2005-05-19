@@ -22,7 +22,24 @@ class CLanguageFormat
 			'$1$2<sup>th$3</sup>$4',
 		);
 		
-		return preg_replace($astrSources, $astrDestinations, $strHtmlContent);
+		$strReturn = preg_replace($astrSources, $astrDestinations, $strHtmlContent);
+
+	
+		// Le formatage précédent peut avoir placé des balises dans des balises, il faut les échapper
+		$astrSources = array('/<([^>]*)<[^<>]*>([^<]*)<\/[^<>]*>/');
+		$astrDestinations = array('<$1$2');
+		
+		while(true)
+		{
+			$strReturn2 = preg_replace($astrSources, $astrDestinations, $strReturn);
+
+			if( $strReturn2 == $strReturn )
+				break;
+
+			$strReturn = $strReturn2;
+		}
+
+		return $strReturn2;
 	}
 }
 ?>
