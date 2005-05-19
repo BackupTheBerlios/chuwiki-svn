@@ -36,12 +36,8 @@ class CLanguageFormat
 
 	
 		// Le formatage précédent peut avoir placé des balises dans des balises, il faut les échapper
-		$astrSources = array(
-			'/<([^>]*)<[^<>]*>([^<]*)<\/[^<>]*>/',
-		);
-		$astrDestinations = array(
-			'<$1$2',
-		);
+		$astrSources = array('/<([^>]*)<[^<>]*>([^<]*)<\/[^<>]*>/');
+		$astrDestinations = array('<$1$2');
 		
 		while(true)
 		{
