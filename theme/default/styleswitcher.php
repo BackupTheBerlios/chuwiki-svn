@@ -48,12 +48,14 @@ if(isset($_COOKIE['Style']))
 
 if($strStyle == '') // Aucun style choisi
 {
-	printStylesheet('DarkBlue');
+	printStylesheet('ChuWiki');
+	printAlternateStylesheet('DarkBlue');
 	printAlternateStylesheet('Icy');
 }
 else // L'utilisateur a choisi un style
 {
 	printStylesheet($strStyle);
+	printAlternateStylesheet('ChuWiki');
 	printAlternateStylesheet('DarkBlue');
 	printAlternateStylesheet('Icy');
 }

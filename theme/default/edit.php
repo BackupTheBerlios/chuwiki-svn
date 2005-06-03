@@ -36,7 +36,7 @@
 
 <h1>&Lang.EditTitle; &Page.Name;</h1>
 
-<div id="Content">
+<div id="Content" class="Preview">
 &Page.Html;
 </div>
 
