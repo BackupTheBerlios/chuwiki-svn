@@ -61,7 +61,7 @@ foreach($astrLatestChanges as $strPage => $strDate)
 		$entry = array();
 		$entry['page'] = htmlspecialchars($strPage);
 		$entry['link'] = $strDomain . GetScriptURI('Wiki') . rawurlencode($strPage);
-		$entry['date'] = FormatRfc1123Date($strDate);
+		$entry['date'] = $strDate;
 		$aEntries[] = $entry;
 }
 
@@ -81,9 +81,9 @@ foreach($aEntries as $entry)
 {
 ?>
     <item>
-      <title><?php echo $entry['page'] ?></title>
+      <title><?php echo $entry['page'] ?> - <?php echo $entry['date'] ?></title>
       <link><?php echo $entry['link'] ?></link>
-      <pubDate><?php echo $entry['date'] ?></pubDate>
+      <pubDate><?php echo FormatRfc1123Date($entry['date']) ?></pubDate>
     </item>
 <?php
 }
