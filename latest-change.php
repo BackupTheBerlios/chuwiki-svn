@@ -50,7 +50,7 @@ function FormatLongIso8601Date($strDate)
 }
 
 $astrLatestChanges = GetLatestChangePageList();
-$strLatestDate = reset($astrLatestChanges);
+$strLatestDate = FormatRfc1123Date(reset($astrLatestChanges));
 
 $strDomain = 'http://' . $_SERVER['SERVER_NAME'];
 $strURI = $strDomain . $k_strWikiURI;
@@ -61,7 +61,7 @@ foreach($astrLatestChanges as $strPage => $strDate)
 		$entry = array();
 		$entry['page'] = htmlspecialchars($strPage);
 		$entry['link'] = $strDomain . GetScriptURI('Wiki') . rawurlencode($strPage);
-		$entry['date'] = FormatLongIso8601Date($strDate);
+		$entry['date'] = FormatRfc1123Date($strDate);
 		$aEntries[] = $entry;
 }
 
@@ -69,52 +69,24 @@ header('Content-Type: application/xml; charset=UTF-8');
 echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 ////////////////////////////////////////////////////////////////////////////////
 ?>
-<rdf:RDF
-  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-  xmlns:dc="http://purl.org/dc/elements/1.1/"
-  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
-  xmlns:admin="http://webns.net/mvcb/"
-  xmlns="http://purl.org/rss/1.0/">
-
-<channel rdf:about="<?php echo $strURI ?>">
-	<title><?php echo $k_aConfig['Title'] . ' - ' . $k_aLangConfig['ChangesPage'] ?></title>
-	<description><![CDATA[]]></description>
+<rss version="2.0">
+<channel>
+	<title><?php echo $k_aConfig['Title'] ?></title>
 	<link><?php echo $strURI ?></link>
-<?php
-	$strDate = FormatLongIso8601Date($strLatestDate);
-?>
-	<dc:date><?php echo $strDate ?></dc:date>
-	<admin:generatorAgent rdf:resource="http://chuwiki.berlios.de/" />
+	<description><![CDATA[<?php echo $k_aLangConfig['ChangesPage'] ?>]]></description>
+	<lastBuildDate><?php echo $strLatestDate ?></lastBuildDate>
 
-	<sy:updatePeriod>daily</sy:updatePeriod>
-	<sy:updateFrequency>1</sy:updateFrequency>
-	<sy:updateBase><?php echo $strDate ?></sy:updateBase>
-
-	<items>
-	<rdf:Seq>
 <?php
 foreach($aEntries as $entry)
 {
 ?>
-		<rdf:li rdf:resource="<?php echo $entry['link'] ?>" />
+    <item>
+      <title><?php echo $entry['page'] ?></title>
+      <link><?php echo $entry['link'] ?></link>
+      <pubDate><?php echo $entry['date'] ?></pubDate>
+    </item>
 <?php
 }
 ?>
-	</rdf:Seq>
-	</items>
 </channel>
-
-<?php
-foreach($aEntries as $entry)
-{
-?>
-<item rdf:about="<?php echo $entry['link'] ?>">
-  <title><?php echo $entry['page'] ?></title>
-  <link><?php echo $entry['link'] ?></link>
-  <dc:date><?php echo $entry['date'] ?></dc:date>
-</item>
-
-<?php
-}
-?>
-</rdf:RDF>
+</rss>
