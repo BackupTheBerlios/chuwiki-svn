@@ -46,7 +46,7 @@ function FormatLongIso8601Date($strDate)
 	$strMinute = substr($strDate, 10, 2);
 	$strSecond = substr($strDate, 12, 2);
 	$date = mktime($strHour, $strMinute, $strSecond, $strMonth, $strDay, $strYear);
-	return date('Y-m-d\TH:i:s', $date);
+	return date('Y-m-d \T H:i:s', $date);
 }
 
 $astrLatestChanges = GetLatestChangePageList();
@@ -81,7 +81,7 @@ foreach($aEntries as $entry)
 {
 ?>
     <item>
-      <title><?php echo $entry['page'] ?> - <?php echo $entry['date'] ?></title>
+      <title><?php echo $entry['page'] ?> (<?php echo FormatLongIso8601Date($entry['date']) ?>)</title>
       <link><?php echo $entry['link'] ?></link>
       <pubDate><?php echo FormatRfc1123Date($entry['date']) ?></pubDate>
     </item>
