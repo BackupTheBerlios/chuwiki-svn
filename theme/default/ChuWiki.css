@@ -22,6 +22,7 @@
 // ***** END LICENSE BLOCK *****
 ////////////////////////////////////////////////////////////////////////////////
 */
+
 html
 {
 	background: #EEE url(gfx/logo.jpg) no-repeat right top;
@@ -80,17 +81,17 @@ dt
 }
 
 q::before{
-	content: "« ";
+	content: "\ab\a0";
 }
 q::after{
-	content: " »";
+	content: "\a0\bb";
 }
 q[lang]::after{
-	content: " » [" attr(lang) "]";
+	content: "\a0\bb\a0[" attr(lang) "]";
 }
 
 a[hreflang]::after{
-	content: " [" attr(hreflang) "]";
+	content: "\a0[" attr(hreflang) "]";
 }
 
 /* Titre
