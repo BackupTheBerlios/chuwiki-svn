@@ -46,7 +46,7 @@ function FormatLongIso8601Date($strDate)
 	$strMinute = substr($strDate, 10, 2);
 	$strSecond = substr($strDate, 12, 2);
 	$date = mktime($strHour, $strMinute, $strSecond, $strMonth, $strDay, $strYear);
-	return date('Y-m-d \T H:i:s', $date);
+	return date('Y-m-d H:i:s', $date);
 }
 
 $astrLatestChanges = GetLatestChangePageList();
