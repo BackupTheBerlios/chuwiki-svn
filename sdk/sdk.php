@@ -28,6 +28,10 @@ require(dirname(__FILE__) . '/wiki2xhtml/class.wiki2xhtml.php');
 require(dirname(__FILE__) . '/WikiRenderer/WikiRenderer.lib.php');
 require(dirname(__FILE__) . '/WikiRenderer/WikiRenderer_chu.conf.php');
 
+
+$k_strVersion = 'ChuWiki 1.2';
+
+
 // Les fonctions d'ouverture de fichier doivent utiliser ou non 
 // la zlib selon que celle-ci est présente ou pas
 $ChuFile = 'file';
@@ -48,8 +52,6 @@ if ( function_exists('gzfile') ) // zlib disponible
 
 }
 ///////////////////////////////////////////////////////////////////
-
-$k_strVersion = 'ChuWiki 1.2RC';
 
 // Construction de l'URI où est installé ChuWiki
 $k_strWikiURI = dirname($_SERVER['SCRIPT_NAME']) . '/';
