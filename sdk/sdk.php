@@ -710,7 +710,7 @@ function WriteXhtmlHeader()
 	header("Cache-Control: no-cache, must-revalidate");           // HTTP/1.1
 	header("Pragma: no-cache");                                   // HTTP/1.0
   
-	if ( stristr($_SERVER['HTTP_ACCEPT'], 'application/xhtml+xml') ) 
+	if ( @stristr($_SERVER['HTTP_ACCEPT'], 'application/xhtml+xml') ) 
 	{
 		header('Content-type: application/xhtml+xml; charset=' . $strCharset);
 		echo '<?xml version="1.0" encoding="' . $strCharset . '"?>' . "\n";
