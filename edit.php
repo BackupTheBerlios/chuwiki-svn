@@ -53,11 +53,12 @@ else if ( isset($_POST['Save']) )
 	// En mode sauvegarde
 	$strWikiContent = GetPostedWiki();
 	
-	// Enregistremet de la page
+	// Enregistrement de la page
 	Save($strPage, $strWikiContent);
 
 	// Redirection vers l'affichage de la page
 	header('Location: ' . GetScriptURI('Wiki')  . $strPage);
+	exit();
 }
 else
 {
