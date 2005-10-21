@@ -24,11 +24,6 @@
 
 error_reporting(E_ALL);
 
-require(dirname(__FILE__) . '/wiki2xhtml/class.wiki2xhtml.php');
-require(dirname(__FILE__) . '/WikiRenderer/WikiRenderer.lib.php');
-require(dirname(__FILE__) . '/WikiRenderer/WikiRenderer_chu.conf.php');
-
-
 $k_strVersion = 'ChuWiki 1.2';
 
 
@@ -374,7 +369,7 @@ function Render($strWikiContent)
 	$formatter = null;
 	if( file_exists($strFileFormat) )
 	{
-		require(dirname(__FILE__) . '/../' . $strFileFormat);
+		require_once(dirname(__FILE__) . '/../' . $strFileFormat);
 
 		if( class_exists('CLanguageFormat') )
 		{
@@ -392,12 +387,16 @@ function Render($strWikiContent)
 	switch($k_aConfig['Renderer'])
 	{
 	case 'WikiRenderer':
+		require_once(dirname(__FILE__) . '/WikiRenderer/WikiRenderer.lib.php');
+		require_once(dirname(__FILE__) . '/WikiRenderer/WikiRenderer_chu.conf.php');
+
 		$Config = new ChuWikiConfig();
 		$Renderer = new WikiRenderer($Config);
 		$strHtmlContent = $Renderer->Render($strWikiContent);
 		break;
 
 	case 'wiki2xhtml':
+		require_once(dirname(__FILE__) . '/wiki2xhtml/class.wiki2xhtml.php');
 		$Renderer = new wiki2xhtml();
 		$strHtmlContent = $Renderer->transform($strWikiContent);
 		break;
@@ -419,7 +418,7 @@ function Render($strWikiContent)
 
 	if ( $k_aConfig['SmileyPath'] != '' )
 	{
-		require(dirname(__FILE__) . '/smiley-replacer.php');
+		require_once(dirname(__FILE__) . '/smiley-replacer.php');
 		MakeImageSmileys($strHtmlContent);
 	}
 
