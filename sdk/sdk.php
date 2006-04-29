@@ -24,7 +24,7 @@
 
 error_reporting(E_ALL);
 
-$k_strVersion = 'ChuWiki 1.2';
+$k_strVersion = 'ChuWiki 1.3α';
 
 
 // Les fonctions d'ouverture de fichier doivent utiliser ou non 
@@ -55,8 +55,9 @@ if ( $k_strWikiURI == '//' || $k_strWikiURI == './' )
 	$k_strWikiURI = '/';
 }
 
-$k_aConfig = ParseIniFile('configuration.ini');
-$k_aLangConfig = ParseIniFile($k_aConfig['LanguagePath'] . '/' . 'lang.ini');
+$k_aConfig = ParseIniFile(dirname(__FILE__) . '/../configuration.ini');
+$k_aLangConfig = ParseIniFile(dirname(__FILE__) . '/../' 
+					. $k_aConfig['LanguagePath'] . '/' . 'lang.ini');
 
 ///////////////////////////////////////////////////////////////////
 function ParseIniFile($strFileName)
@@ -99,8 +100,8 @@ function GetUriInfo()
 
 	$strPage = '';
 
-	// L'URI peut �tre compos�e de 3 parties :
-	// le script, le s�parateur de page, et la page
+	// L'URI peut être composée de 3 parties :
+	// le script, le séparateur de page, et la page
 	// Il faut extraire le script et la page	
 
 	// Sans PathInfo
@@ -121,7 +122,7 @@ function GetUriInfo()
 	$nSeparatorLength = strlen($strSeparator);
 	if( substr($strScript, -$nSeparatorLength) != $strSeparator )
 	{
-		// Il n'y a pas de s�parateur � la fin du script, on l'ajoutex
+		// Il n'y a pas de séparateur à la fin du script, on l'ajoute
 		$strScript .= $strSeparator;
 	}
 	
@@ -141,6 +142,12 @@ function Error($strMessage)
 	echo '<p>' . $strMessage . '</p>';
 	exit();
 }
+
+function ErrorUnableToWrite()
+{
+	Error('Impossible d\'écrire cette page, veuillez vérifier que vous possédez les droits d\'écriture dans le répertoire des pages');
+}
+
 
 function GetScriptName()
 {
@@ -206,7 +213,7 @@ function GetPageSeparator()
 function GetPagePath()
 {
 	global $k_aConfig;
-	return FileNameEncode($k_aConfig['PagePath']);
+	return dirname(__FILE__) . '/../' . FileNameEncode($k_aConfig['PagePath']);
 }
 
 function GetScriptURI($strScriptName)
@@ -335,25 +342,70 @@ function InterpretPhpFile($strFilePath)
 	return $strContent;
 }
 
+function GetLatestDateFilePath($strPage)
+{
+	$strPagePath = GetPagePath();
+	$strPage = FileNameEncode($strPage);
+
+	return $strPagePath . '/' . $strPage . '/latest-change.txt';
+}
+
+function SaveDateLatest($strPage, $strDateLatest)
+{
+	$strChangeFile = GetLatestDateFilePath($strPage);
+	$file = @fopen($strChangeFile, 'w');
+	if ( $file === FALSE )
+	{
+		return;
+	}
+	fwrite($file, $strDateLatest);
+	fclose($file);	
+	@chmod($strChangeFile, 0777);
+}
+
+function GetWikiContentFile($strPage, $strDate)
+{
+	global $k_strExtension;
+	return GetPagePath(). '/' . $strPage .  '/' . $strDate . '.' . $k_strExtension;
+}
+
+function GetLatestDate($strPage)
+{
+	$strDateLatestFilePath = GetLatestDateFilePath($strPage);
+	$strDateLatest = @implode('', file($strDateLatestFilePath));
+	$strFileLatest = GetWikiContentFile($strPage, $strDateLatest);
+
+	// Si le cache n'existe pas ou que la page indiquée a été supprimée
+	// On va devoir recréer le cache
+	if( $strDateLatest == '' || !is_file($strFileLatest) )
+	{
+		$aHistory = GetHistory($strPage);
+		$strDateLatest = reset($aHistory);
+
+		// Comme on est passé par l'ancienne méthode 
+		// qui n'utilisait pas le cache,
+		// on peut maintenant enregistrer le cache
+		SaveDateLatest($strPage, $strDateLatest);
+	}
+	return $strDateLatest;
+}
+
 function GetWikiContent($strPage)
 {
-	$astrHistory = GetHistory($strPage);
-	$strLatestDate = reset($astrHistory);
+	$strLatestDate = GetLatestDate($strPage);
 
 	return GetSavedWikiContent($strPage, $strLatestDate);
 }
 
 function GetSavedWikiContent($strPage, $strDate)
 {
-	global $k_aConfig, $k_strExtension;
+	global $k_strExtension;
 
-	$strSavePath = GetPagePath(). '/' . $strPage .  '/' . $strDate . '.' . $k_strExtension;
-
+	$strSavePath = GetWikiContentFile($strPage, $strDate);
 	$strContent =  LoadFile($strSavePath);
 
 	return $strContent;
 }
-
 
 function Render($strWikiContent)
 {
@@ -499,36 +551,47 @@ function Save($strPage, $strWikiContent)
 {
 	global $k_strExtension, $k_aConfig, $ChuOpen, $ChuWrite, $ChuClose;
 
-	$strPage = FileNameEncode($strPage);
+	$strPageEncoded = FileNameEncode($strPage);
 
 	// Création du répertoire des pages
 	$strSavePath = GetPagePath();
 	CreateDir($strSavePath);
 	
 	// Création du répertoire de la page
-	$strSavePath .= '/' . $strPage;
+	$strSavePath .= '/' . $strPageEncoded;
 	CreateDir($strSavePath);
 
 	// On enregistre le contenu du fichier
-	$strSavePath .= '/' . date('YmdHis') . '.' . $k_strExtension;
+	$strDate = date('YmdHis');
+	$strSavePath .= '/' . $strDate . '.' . $k_strExtension;
 	$file = $ChuOpen($strSavePath, 'w9');
 	if ( $file === FALSE )
 	{
 		// Impossible d'ouvrir le fichier en écriture
-		Error('Impossible d\'écrire cette page, veuillez vérifier que vous possédez les droits d\'écriture dans le répertoire des pages');
+		ErrorUnableToWrite();
 	}
 	$ChuWrite($file, $strWikiContent);
-
 	$ChuClose($file);
-	
-	// Modification des droits du fichier
 	@chmod($strSavePath, 0777);
+
+	// On enregistre le fichier indiquant le dernier changement	
+	SaveDateLatest($strPage, $strDate);
 }
 
 function FormatDate($date)
 {
 	return $strDate = substr($date, 0, 4) . '-' . substr($date, 4, 2) . '-' . substr($date, 6, 2) 
 			. ' T ' . substr($date, 8, 2) . ':' . substr($date, 10, 2) . ':' . substr($date, 12, 2);
+}
+
+function IsArchiveFile($strFile)
+{
+	$astr = explode('.', $strFile);
+	if( preg_match('/[0-9]{14}/', $astr[0]) == 1)
+	{
+		return true;
+	}
+	return false;
 }
 
 function GetHistory($strPage)
@@ -540,6 +603,7 @@ function GetHistory($strPage)
 
 	$aHistory = array();
 
+	$strDateLatestFilePath = GetLatestDateFilePath($strPage);
 	$strDirPath = $strPagePath . '/' . $strPage;
 	$dir = @opendir($strDirPath);
 	if ( $dir !== FALSE )
@@ -547,7 +611,7 @@ function GetHistory($strPage)
 		while( $strEntry = readdir($dir) )
 		{
 			$strFilePath = $strDirPath . '/' . $strEntry;
-			if ( is_file($strFilePath) )
+			if ( IsArchiveFile($strEntry) )
 			{
 				$astr = explode('.', $strEntry);
 				$aHistory[] = $astr[0];
@@ -601,12 +665,11 @@ function GetLatestChangePageList()
 	$dir = opendir($strPagePath);
 	while( $strEntry = readdir($dir) )
 	{
-		if ( $strEntry != '.' && $strEntry != '..' && is_dir($strPagePath . '/' . $strEntry) )
+		$strFullPath = $strPagePath . '/' . $strEntry;
+		if ( $strEntry != '.' && $strEntry != '..' && is_dir($strFullPath) )
 		{
 			$strEntry = rawurldecode($strEntry);
-			$aHistory = GetHistory($strEntry);
-			$dateLatest = reset($aHistory);
-			$astrList[$strEntry] = $dateLatest;
+			$astrList[$strEntry] = GetLatestDate($strEntry);
 		}
 	}
 	closedir($dir);

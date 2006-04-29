@@ -22,10 +22,12 @@
 // ***** END LICENSE BLOCK *****
 ////////////////////////////////////////////////////////////////////////////////
 
-define(CookieName, 'Style');
+define('CookieName', 'Style');
 
 // Style à appliquer
-$strStyle = substr($_SERVER['PATH_INFO'], 1);
+//$strStyle = substr($_SERVER['PATH_INFO'], 1);
+$strStyle = urldecode($_SERVER['QUERY_STRING']);
+
 
 setcookie(CookieName, $strStyle, time() + 3600 * 24 * 365, 
 	dirname(dirname(dirname($_SERVER['SCRIPT_NAME']))));

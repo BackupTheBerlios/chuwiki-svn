@@ -25,7 +25,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="&Lang.Code;" xml:lang="&Lang.Code;">
 <head>
-<title>&Config.Title; &Lang.EditTitle; &Page.Name;</title>
+<title>&Config.Title; &Lang.EditTitle; &Page.Name;</title>
 <meta name="robots" content="noindex,nofollow"/>
 <meta name="Generator" content="&Config.Version;"/>
 <?php include('styleswitcher.php') ?>
@@ -40,7 +40,7 @@
 &Page.Html;
 </div>
 
-<form method="post" action="#">
+<form method="post" action="">
 <div>
 <textarea id="Wiki" name="Wiki" cols="80" rows="20">&Page.Wiki;</textarea>
 </div>
