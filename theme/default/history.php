@@ -42,7 +42,7 @@
 
 <form method="post" action="">
 <div>
-<select name="Date" size="10">
+<select name="Date" id="Date" size="10">
 &Page.History;
 </select>
 </div>
