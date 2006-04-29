@@ -93,6 +93,21 @@ function ParseIniFile($strFileName)
 	return $aVars;
 }
 
+// Utile seulement pour les templates souhaitant
+// accéder en PHP à des variables de la config
+function GetConfigVar($strVarName)
+{
+	global $k_aConfig;
+	return $k_aConfig[$strVarName];
+}
+
+// Utile seulement pour les templates souhaitant
+// accéder en PHP à des variables de la config
+function GetLangVar($strVarName)
+{
+	global $k_aLangConfig;
+	return $k_aLangConfig[$strVarName];
+}
 
 function GetUriInfo()
 {
