@@ -26,14 +26,8 @@ error_reporting(E_ALL);
 
 $k_strVersion = 'ChuWiki 1.3α';
 
-
 // Les fonctions d'ouverture de fichier doivent utiliser ou non 
 // la zlib selon que celle-ci est présente ou pas
-$ChuFile = 'file';
-$ChuOpen = 'fopen';
-$ChuWrite = 'fwrite';
-$ChuClose = 'fclose';
-$k_strExtension = 'txt';
 if ( function_exists('gzfile') ) // zlib disponible
 {
 	$ChuFile = 'gzfile';
@@ -44,8 +38,22 @@ if ( function_exists('gzfile') ) // zlib disponible
 
 	// Active la compression du contenu
 	ob_start('ob_gzhandler');
-
 }
+else
+{
+	$ChuFile = 'file';
+	$ChuOpen = 'fopen';
+	$ChuWrite = 'fwrite';
+	$ChuClose = 'fclose';
+	$k_strExtension = 'txt';
+	ob_start();
+}
+
+
+// Chargement des configuration
+$k_aConfig = ParseIniFile(dirname(__FILE__) . '/../configuration.ini');
+$k_aLangConfig = ParseIniFile(dirname(__FILE__) . '/../' . $k_aConfig['LanguagePath'] . '/' . 'lang.ini');
+
 ///////////////////////////////////////////////////////////////////
 
 // Construction de l'URI où est installé ChuWiki
@@ -54,10 +62,6 @@ if ( $k_strWikiURI == '//' || $k_strWikiURI == './' )
 {
 	$k_strWikiURI = '/';
 }
-
-$k_aConfig = ParseIniFile(dirname(__FILE__) . '/../configuration.ini');
-$k_aLangConfig = ParseIniFile(dirname(__FILE__) . '/../' 
-					. $k_aConfig['LanguagePath'] . '/' . 'lang.ini');
 
 ///////////////////////////////////////////////////////////////////
 function ParseIniFile($strFileName)
@@ -161,17 +165,6 @@ function Error($strMessage)
 function ErrorUnableToWrite()
 {
 	Error('Impossible d\'écrire cette page, veuillez vérifier que vous possédez les droits d\'écriture dans le répertoire des pages');
-}
-
-
-function GetScriptName()
-{
-	$strScript = $_SERVER["REQUEST_URI"];
-	$nScriptEnd = strrpos($strScript, GetPageSeparator());
-	$strScript = substr($strScript, 0, $nScriptEnd);
-	echo $strScript;
-	exit();
-	return $strScript;
 }
 
 function GetCurrentPage()
@@ -623,8 +616,13 @@ function GetHistory($strPage)
 	$dir = @opendir($strDirPath);
 	if ( $dir !== FALSE )
 	{
-		while( $strEntry = readdir($dir) )
+		while( true )
 		{
+			$strEntry = readdir($dir);
+			if( $strEntry === false )
+			{
+				break;
+			}
 			$strFilePath = $strDirPath . '/' . $strEntry;
 			if ( IsArchiveFile($strEntry) )
 			{
@@ -639,6 +637,7 @@ function GetHistory($strPage)
 	return $aHistory;
 }
 
+
 function GetPageList()
 {
 	global $k_aConfig;
@@ -652,34 +651,13 @@ function GetPageList()
 	}
 	
 	$dir = opendir($strPagePath);
-	while( $strEntry = readdir($dir) )
+	while( true )
 	{
-		if ( $strEntry != '.' && $strEntry != '..' && is_dir($strPagePath . '/' . $strEntry) )
+		$strEntry = readdir($dir);
+		if( $strEntry === false )
 		{
-			$astrList[] = rawurldecode($strEntry);
+			break;
 		}
-	}
-	closedir($dir);
-	sort($astrList);
-
-	return $astrList;
-}
-
-function GetLatestChangePageList()
-{
-	global $k_aConfig;
-
-	$strPagePath = GetPagePath();
-
-	$astrList = array();
-	if( !is_dir($strPagePath) )
-	{
-		return $astrList;
-	}
-	
-	$dir = opendir($strPagePath);
-	while( $strEntry = readdir($dir) )
-	{
 		$strFullPath = $strPagePath . '/' . $strEntry;
 		if ( $strEntry != '.' && $strEntry != '..' && is_dir($strFullPath) )
 		{
@@ -688,6 +666,21 @@ function GetLatestChangePageList()
 		}
 	}
 	closedir($dir);
+
+	return $astrList;
+}
+
+function GetSortedPageList()
+{
+	$astrList = GetPageList();
+	asort($astrList);
+
+	return $astrList;
+}
+
+function GetLatestChangePageList()
+{
+	$astrList = GetPageList();
 	arsort($astrList);
 
 	return $astrList;
@@ -700,7 +693,7 @@ function GetPageListContent()
 	$astrList = GetPageList();
 
 	$strContent = '';
-	foreach($astrList as $strEntry)
+	foreach($astrList as $strEntry => $date)
 	{
 			$strContent .= "\n" . '-[' . $strEntry . ']';
 	}
