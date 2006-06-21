@@ -569,6 +569,11 @@ function Save($strPage, $strWikiContent)
 	$strSavePath .= '/' . $strPageEncoded;
 	CreateDir($strSavePath);
 
+	if( file_exists($strSavePath . '/lock') )
+	{
+		ErrorUnableToWrite();
+	}
+
 	// On enregistre le contenu du fichier
 	$strDate = date('YmdHis');
 	$strSavePath .= '/' . $strDate . '.' . $k_strExtension;
