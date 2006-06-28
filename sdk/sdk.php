@@ -472,7 +472,7 @@ function Render($strWikiContent)
 		$strHtmlContent = preg_replace('/href="(.*)"/', 'href="?\1"', $strHtmlContent);
 		$strHtmlContent = preg_replace('/href="\?(\.\..*)"/', 'href="\1"', $strHtmlContent);
 		$strHtmlContent = preg_replace('/href="\?(\/.*)"/', 'href="\1"', $strHtmlContent);
-		$strHtmlContent = preg_replace('/href="\?(http:.*)"/', 'href="\1"', $strHtmlContent);
+		$strHtmlContent = preg_replace('/href="\?([a-zA-Z]+:.*)"/', 'href="\1"', $strHtmlContent);
 		$strHtmlContent = preg_replace('/href="\?(#.*)"/', 'href="\1"', $strHtmlContent);
 	}
 
@@ -571,6 +571,7 @@ function Save($strPage, $strWikiContent)
 
 	if( file_exists($strSavePath . '/lock') )
 	{
+		// Cette page est protégée
 		ErrorUnableToWrite();
 	}
 
