@@ -687,7 +687,7 @@ function GetPageList()
 function GetSortedPageList()
 {
 	$astrList = GetPageList();
-	asort($astrList);
+	ksort($astrList);
 
 	return $astrList;
 }
@@ -704,7 +704,7 @@ function GetPageListContent()
 {
 	global $k_aConfig;
 
-	$astrList = GetPageList();
+	$astrList = GetSortedPageList();
 
 	$strContent = '';
 	foreach($astrList as $strEntry => $date)
