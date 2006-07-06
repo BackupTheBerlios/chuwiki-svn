@@ -41,7 +41,7 @@
 </div>
 
 <div id="Menu">
-<?php echo Render(GetWikiContent(GetLangVar('MenuPage'))) ?>
+<?php echo RenderPage(GetLangVar('MenuPage')) ?>
 <p><a href="&Config.WikiURI;&Lang.MenuPage;">&Lang.MenuPage;</a></p>
 </div>
 

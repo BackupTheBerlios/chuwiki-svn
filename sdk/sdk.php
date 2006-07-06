@@ -415,6 +415,14 @@ function GetSavedWikiContent($strPage, $strDate)
 	return $strContent;
 }
 
+function RenderPage($strPage)
+{
+	$strWikiContent = GetWikiContent($strPage);
+	$strModifiedWikiContent = $strWikiContent . GetSpecialContent($strPage);
+
+	return Render($strModifiedWikiContent);
+}
+
 function Render($strWikiContent)
 {
 	global $k_aConfig, $k_aLangConfig;
