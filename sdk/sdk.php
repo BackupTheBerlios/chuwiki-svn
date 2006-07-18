@@ -90,7 +90,7 @@ function ParseIniFile($strFileName)
 			$strName = trim(substr($strLine, 0, $nMiddle));
 			$strValue = trim(substr($strLine, $nMiddle + 1));
 
-			$aVars[$strName] = $strValue;
+			$aVars[$strName] = xhtmlspecialchars($strValue);
 		}
 	}
 	
@@ -477,6 +477,7 @@ function Render($strWikiContent)
 	// Sans PathInfo, il faut mettre un ? devant les liens vers les pages internes
 	if( $k_aConfig['UsePathInfo'] != 'true' )
 	{
+		//$strHtmlContent = preg_replace('/href="([^"]*)"/', 'href="?\1"', $strHtmlContent);
 		$strHtmlContent = preg_replace('/href="(.*)"/', 'href="?\1"', $strHtmlContent);
 		$strHtmlContent = preg_replace('/href="\?(\.\..*)"/', 'href="\1"', $strHtmlContent);
 		$strHtmlContent = preg_replace('/href="\?(\/.*)"/', 'href="\1"', $strHtmlContent);
