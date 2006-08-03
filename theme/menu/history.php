@@ -45,7 +45,7 @@
 <p><a href="&Config.WikiURI;&Lang.MenuPage;">&Lang.MenuPage;</a></p>
 </div>
 
-<form method="post" action="">
+<form method="post" action="#">
 <div>
 <select name="Date" id="Date" size="10">
 &Page.History;

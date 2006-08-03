@@ -82,66 +82,6 @@
 
 # Wiki2xhtml
 
-
-/////////////////////////////////////////////////////////////////////////////////
-// Retourne un NCR avec le & changé en 0x00
-// Gère les caractères interdits en XML
-function xhtmlspecialchars_callback($matches)
-{
-	$ncr = $matches[0];
-	
-	$strPrefix = substr($ncr, 0, 3);
-	$nValue = 0;
-	if( strcmp($strPrefix, "&#x") == 0)
-	{
-		// Hexadécimal
-		$nValue = sscanf($ncr, "&#x%x");
-	}
-	else
-	{
-		// Décimal
-		$nValue = sscanf($ncr, "&#%d");
-	}
-	if( $nValue < 32 && $nValue != 9 && $nValue != 10 && $nValue != 13)
-	{
-		// Référence sur un caractère interdit
-		// On remplace la totalité du NCR par un code qui sera remplacé par un caractère sûr
-		$ncr = chr(1);
-	}
-	else
-	{
-		$ncr[0] = chr(0); // Remplace l'esperluette par un 0 pour un changement ultérieur
-	}
-	return $ncr;
-}
-
-// Convertit les caractères qui posent problème en xhtml en conservant les références numériques sur caractères
-// ENT_COMPAT : convertit les guillemets anglais (doublequote) mais pas les apostrophes (simplequote)
-// ENT_QUOTES : convertit les guillemets anglais et les apostrophes
-// ENT_NOQUOTES : pas de conversion des guillemets et des apostrophes
-// www.psydk.org v2 2004-01-08
-function xhtmlspecialchars($str, $quotestyle = ENT_COMPAT)
-{
-	// 1) Remplacement des caractères interdits par le caractère 0x01
-	// Tous les caractères < 32 sont interdits, sauf 9, 10 et 13 (tab, \n et \r)
-	// Note : utiliser chr() est meilleur que "\xx", sinon certains caractères ne passent pas
-	$aForbiddenChars = array(chr(0), chr(1), chr(2), chr(3), chr(4), chr(5), chr(6), chr(7), chr(8),
-		chr(11), chr(12), chr(14), chr(15), chr(16), chr(17), chr(18), chr(19), chr(20), chr(21), chr(22),
-		chr(23), chr(24), chr(25), chr(26), chr(27), chr(28), chr(29), chr(30), chr(31) );
-	$str = str_replace($aForbiddenChars, chr(1), $str);
-	// 2) Remplacement des esperluettes des NCR par le caractère 0x00
-	$str = preg_replace_callback('/&#[0-9]+;|&#x[0-9a-fA-F]+;/', 'xhtmlspecialchars_callback', $str);
-	// 3) Remplacement des caractères spéciaux de contrôle xml ( < > & ' et ") par une entité ou un NCR
-	$str = htmlspecialchars($str, $quotestyle);
-	// 4) Ajout des esperluettes des NCR
-	$str = str_replace(chr(0), '&', $str);
-	// 5) Utilisation d'un caractère sûr (65533=Losange point d'interrogation) pour les caractères spéciaux interdits
-	$str = str_replace(chr(1), '&#65533;', $str);
-	return $str;
-}
-/////////////////////////////////////////////////////////////////////////////////
-
-
 class wiki2xhtml
 {
 	var $__version__ = '3.1a';

@@ -36,22 +36,24 @@ function GetPostDate()
 
 // Chargement des informations de la page
 $strPage = GetCurrentPage();
+$strDate = GetPostDate();
 
 if ( isset($_POST['Preview']) )
 {
 	// Chargement du contenu wiki sauvegardé pour cette page
 	$strWikiContent = GetSavedWikiContent($strPage, GetPostDate());
 }
-else if ( isset($_POST['Save']) && GetPostDate() !=  '' )
+else if ( isset($_POST['Save']) && $strDate !=  '' )
 {
 	// En mode restauration
-	$strWikiContent = GetSavedWikiContent($strPage, GetPostDate());
+	echo $strPage;
+	$strWikiContent = GetSavedWikiContent($strPage, $strDate);
 
 	// Enregistremet de la page
 	Save($strPage, $strWikiContent);
 
 	// Redirection vers l'affichage de la page
-	header('Location: ' . GetScriptURI('Wiki')  . $strPage);
+	header('Location: ' . GetScriptURI('Wiki')  . FileNameEncode($strPage));
 	exit();
 }
 else

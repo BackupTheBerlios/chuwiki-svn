@@ -26,33 +26,34 @@ error_reporting(E_ALL);
 
 $k_strVersion = 'ChuWiki 1.3α';
 
+// Chargement des configuration
+$k_aConfig = ParseIniFile(dirname(__FILE__) . '/../configuration.ini');
+$k_aLangConfig = ParseIniFile(dirname(__FILE__) . '/../' . $k_aConfig['LanguagePath'] . '/' . 'lang.ini');
+
+
 // Les fonctions d'ouverture de fichier doivent utiliser ou non 
 // la zlib selon que celle-ci est présente ou pas
-if ( function_exists('gzfile') ) // zlib disponible
-{
-	$ChuFile = 'gzfile';
-	$ChuOpen = 'gzopen';
-	$ChuWrite = 'gzwrite';
-	$ChuClose = 'gzclose';
-	$k_strExtension = 'gz';
+$k_bCanZlib = function_exists('gzfile');
+$k_bUseZlib = ($k_bCanZlib && @$k_aConfig['NoCompression'] != 'true');
 
+$ChuFile = $k_bCanZlib ? 'gzfile' : 'file';
+$ChuOpen = $k_bUseZlib ? 'gzopen' : 'fopen';
+$ChuWrite = $k_bUseZlib ? 'gzwrite' : 'fwrite';
+$ChuClose = $k_bUseZlib ? 'gzclose' : 'fclose';
+$k_strCompressedExtension = 'gz';
+$k_strUncompressedExtension = 'txt';
+$k_strExtension = $k_bUseZlib ? $k_strCompressedExtension : $k_strUncompressedExtension;
+
+if( $k_bUseZlib )
+{
 	// Active la compression du contenu
 	ob_start('ob_gzhandler');
 }
 else
 {
-	$ChuFile = 'file';
-	$ChuOpen = 'fopen';
-	$ChuWrite = 'fwrite';
-	$ChuClose = 'fclose';
-	$k_strExtension = 'txt';
 	ob_start();
 }
 
-
-// Chargement des configuration
-$k_aConfig = ParseIniFile(dirname(__FILE__) . '/../configuration.ini');
-$k_aLangConfig = ParseIniFile(dirname(__FILE__) . '/../' . $k_aConfig['LanguagePath'] . '/' . 'lang.ini');
 
 ///////////////////////////////////////////////////////////////////
 
@@ -63,6 +64,64 @@ if ( $k_strWikiURI == '//' || $k_strWikiURI == './' )
 	$k_strWikiURI = '/';
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+// Retourne un NCR avec le & changé en 0x00
+// Gère les caractères interdits en XML
+function xhtmlspecialchars_callback($matches)
+{
+	$ncr = $matches[0];
+	
+	$strPrefix = substr($ncr, 0, 3);
+	$nValue = 0;
+	if( strcmp($strPrefix, "&#x") == 0)
+	{
+		// Hexadécimal
+		$nValue = sscanf($ncr, "&#x%x");
+	}
+	else
+	{
+		// Décimal
+		$nValue = sscanf($ncr, "&#%d");
+	}
+	if( $nValue < 32 && $nValue != 9 && $nValue != 10 && $nValue != 13)
+	{
+		// Référence sur un caractère interdit
+		// On remplace la totalité du NCR par un code qui sera remplacé par un caractère sûr
+		$ncr = chr(1);
+	}
+	else
+	{
+		$ncr[0] = chr(0); // Remplace l'esperluette par un 0 pour un changement ultérieur
+	}
+	return $ncr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Convertit les caractères qui posent problème en xhtml en conservant les références numériques sur caractères
+// ENT_COMPAT : convertit les guillemets anglais (doublequote) mais pas les apostrophes (simplequote)
+// ENT_QUOTES : convertit les guillemets anglais et les apostrophes
+// ENT_NOQUOTES : pas de conversion des guillemets et des apostrophes
+// www.psydk.org v2 2004-01-08
+function XhtmlSpecialChars($str, $quotestyle = ENT_COMPAT)
+{
+	// 1) Remplacement des caractères interdits par le caractère 0x01
+	// Tous les caractères < 32 sont interdits, sauf 9, 10 et 13 (tab, \n et \r)
+	// Note : utiliser chr() est meilleur que "\xx", sinon certains caractères ne passent pas
+	$aForbiddenChars = array(chr(0), chr(1), chr(2), chr(3), chr(4), chr(5), chr(6), chr(7), chr(8),
+		chr(11), chr(12), chr(14), chr(15), chr(16), chr(17), chr(18), chr(19), chr(20), chr(21), chr(22),
+		chr(23), chr(24), chr(25), chr(26), chr(27), chr(28), chr(29), chr(30), chr(31) );
+	$str = str_replace($aForbiddenChars, chr(1), $str);
+	// 2) Remplacement des esperluettes des NCR par le caractère 0x00
+	$str = preg_replace_callback('/&#[0-9]+;|&#x[0-9a-fA-F]+;/', 'xhtmlspecialchars_callback', $str);
+	// 3) Remplacement des caractères spéciaux de contrôle xml ( < > & ' et ") par une entité ou un NCR
+	$str = htmlspecialchars($str, $quotestyle);
+	// 4) Ajout des esperluettes des NCR
+	$str = str_replace(chr(0), '&', $str);
+	// 5) Utilisation d'un caractère sûr (65533=Losange point d'interrogation) pour les caractères spéciaux interdits
+	$str = str_replace(chr(1), '&#65533;', $str);
+	return $str;
+}
+
 ///////////////////////////////////////////////////////////////////
 function ParseIniFile($strFileName)
 {
@@ -71,7 +130,7 @@ function ParseIniFile($strFileName)
 		Error('Fichier de configuration manquant ' . $strFileName);
 	}
 	
-	$strContent = LoadFile($strFileName);
+	$strContent = implode("", file($strFileName));
 	$astrLines = explode("\n", $strContent);
 
 	$aVars = array();
@@ -221,7 +280,18 @@ function GetPageSeparator()
 function GetPagePath()
 {
 	global $k_aConfig;
-	return dirname(__FILE__) . '/../' . FileNameEncode($k_aConfig['PagePath']);
+	return dirname(__FILE__) . '/../' . $k_aConfig['PagePath'];
+}
+
+
+function ComputePageDir($strPagePath, $strPage)
+{
+	return $strPagePath . '/' . FileNameEncode($strPage);
+}
+
+function GetPageDir($strPage)
+{
+	return ComputePageDir(GetPagePath(), $strPage);
 }
 
 function GetScriptURI($strScriptName)
@@ -322,9 +392,6 @@ function VerifyUtf8($str)
 function LoadFile($strFilePath)
 {
 	global $ChuFile;
-
-	$strFilePath = str_replace('%2F', '/', FileNameEncode($strFilePath));
-
 	if ( !is_file($strFilePath) )
 	{
 		return '';
@@ -350,42 +417,51 @@ function InterpretPhpFile($strFilePath)
 	return $strContent;
 }
 
-function GetLatestDateFilePath($strPage)
+function GetLatestDateFilePath($strPageDir)
 {
-	$strPagePath = GetPagePath();
-	$strPage = FileNameEncode($strPage);
-
-	return $strPagePath . '/' . $strPage . '/latest-change.txt';
+	return $strPageDir . '/latest-change.txt';
 }
 
-function SaveDateLatest($strPage, $strDateLatest)
+function WriteFile($strFile, $strContent)
 {
-	$strChangeFile = GetLatestDateFilePath($strPage);
-	$file = @fopen($strChangeFile, 'w');
+	$file = @fopen($strFile, 'w');
 	if ( $file === FALSE )
 	{
 		return;
 	}
-	fwrite($file, $strDateLatest);
+	fwrite($file, $strContent);
 	fclose($file);	
-	@chmod($strChangeFile, 0777);
+	@chmod($strFile, 0777);
 }
 
 function GetWikiContentFile($strPage, $strDate)
 {
-	global $k_strExtension;
-	return GetPagePath(). '/' . $strPage .  '/' . $strDate . '.' . $k_strExtension;
+	global $k_strCompressedExtension, $k_strUncompressedExtension;
+
+	$strFileBase = GetPageDir($strPage) .  '/' . $strDate . '.';
+	$strCompressedFile = $strFileBase . $k_strCompressedExtension;
+	$strUncompressedFile = $strFileBase . $k_strUncompressedExtension;
+
+	if( file_exists($strCompressedFile) )
+	{
+		return $strCompressedFile;
+	}
+	if( file_exists($strUncompressedFile) )
+	{
+		return $strUncompressedFile;
+	}
+	return '';
 }
 
 function GetLatestDate($strPage)
 {
-	$strDateLatestFilePath = GetLatestDateFilePath($strPage);
+	$strPageDir = GetPageDir($strPage);
+	$strDateLatestFilePath = GetLatestDateFilePath($strPageDir);
 	$strDateLatest = @implode('', file($strDateLatestFilePath));
-	$strFileLatest = GetWikiContentFile($strPage, $strDateLatest);
 
 	// Si le cache n'existe pas ou que la page indiquée a été supprimée
 	// On va devoir recréer le cache
-	if( $strDateLatest == '' || !is_file($strFileLatest) )
+	if( $strDateLatest == '' )
 	{
 		$aHistory = GetHistory($strPage);
 		$strDateLatest = reset($aHistory);
@@ -393,7 +469,7 @@ function GetLatestDate($strPage)
 		// Comme on est passé par l'ancienne méthode 
 		// qui n'utilisait pas le cache,
 		// on peut maintenant enregistrer le cache
-		SaveDateLatest($strPage, $strDateLatest);
+		WriteFile($strDateLatestFilePath, $strDateLatest);
 	}
 	return $strDateLatest;
 }
@@ -568,17 +644,15 @@ function Save($strPage, $strWikiContent)
 {
 	global $k_strExtension, $k_aConfig, $ChuOpen, $ChuWrite, $ChuClose;
 
-	$strPageEncoded = FileNameEncode($strPage);
-
 	// Création du répertoire des pages
-	$strSavePath = GetPagePath();
-	CreateDir($strSavePath);
+	$strPagePath = GetPagePath();
+	CreateDir($strPagePath);
 	
 	// Création du répertoire de la page
-	$strSavePath .= '/' . $strPageEncoded;
-	CreateDir($strSavePath);
+	$strPageDir = ComputePageDir($strPagePath, $strPage);
+	CreateDir($strPageDir);
 
-	if( file_exists($strSavePath . '/lock') )
+	if( file_exists($strPageDir . '/lock') )
 	{
 		// Cette page est protégée
 		ErrorUnableToWrite();
@@ -586,7 +660,8 @@ function Save($strPage, $strWikiContent)
 
 	// On enregistre le contenu du fichier
 	$strDate = date('YmdHis');
-	$strSavePath .= '/' . $strDate . '.' . $k_strExtension;
+	$strSavePath = $strPageDir . '/' . $strDate . '.' . $k_strExtension;
+
 	$file = $ChuOpen($strSavePath, 'w9');
 	if ( $file === FALSE )
 	{
@@ -598,7 +673,7 @@ function Save($strPage, $strWikiContent)
 	@chmod($strSavePath, 0777);
 
 	// On enregistre le fichier indiquant le dernier changement	
-	SaveDateLatest($strPage, $strDate);
+	WriteFile(GetLatestDateFilePath($strPageDir), $strDate);
 }
 
 function FormatDate($date)
@@ -621,14 +696,12 @@ function GetHistory($strPage)
 {
 	global $k_aConfig;
 
-	$strPagePath = GetPagePath();
-	$strPage = FileNameEncode($strPage);
+	$strPageDir = GetPageDir($strPage);
+	$strDateLatestFilePath = GetLatestDateFilePath($strPageDir);
 
 	$aHistory = array();
 
-	$strDateLatestFilePath = GetLatestDateFilePath($strPage);
-	$strDirPath = $strPagePath . '/' . $strPage;
-	$dir = @opendir($strDirPath);
+	$dir = @opendir($strPageDir);
 	if ( $dir !== FALSE )
 	{
 		while( true )
@@ -638,7 +711,7 @@ function GetHistory($strPage)
 			{
 				break;
 			}
-			$strFilePath = $strDirPath . '/' . $strEntry;
+			$strFilePath = $strPageDir . '/' . $strEntry;
 			if ( IsArchiveFile($strEntry) )
 			{
 				$astr = explode('.', $strEntry);

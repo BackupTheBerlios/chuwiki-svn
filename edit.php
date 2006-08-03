@@ -57,7 +57,7 @@ else if ( isset($_POST['Save']) )
 	Save($strPage, $strWikiContent);
 
 	// Redirection vers l'affichage de la page
-	header('Location: ' . GetScriptURI('Wiki')  . $strPage);
+	header('Location: ' . GetScriptURI('Wiki')  . FileNameEncode($strPage));
 	exit();
 }
 else
