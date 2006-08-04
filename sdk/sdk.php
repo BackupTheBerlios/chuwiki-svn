@@ -652,7 +652,7 @@ function Save($strPage, $strWikiContent)
 	$strPageDir = ComputePageDir($strPagePath, $strPage);
 	CreateDir($strPageDir);
 
-	if( file_exists($strPageDir . '/lock') )
+	if( file_exists($strPageDir . '/lock.txt') )
 	{
 		// Cette page est protégée
 		ErrorUnableToWrite();

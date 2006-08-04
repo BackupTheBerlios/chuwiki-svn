@@ -41,12 +41,11 @@ $strDate = GetPostDate();
 if ( isset($_POST['Preview']) )
 {
 	// Chargement du contenu wiki sauvegardé pour cette page
-	$strWikiContent = GetSavedWikiContent($strPage, GetPostDate());
+	$strWikiContent = GetSavedWikiContent($strPage, $strDate);
 }
 else if ( isset($_POST['Save']) && $strDate !=  '' )
 {
 	// En mode restauration
-	echo $strPage;
 	$strWikiContent = GetSavedWikiContent($strPage, $strDate);
 
 	// Enregistremet de la page
