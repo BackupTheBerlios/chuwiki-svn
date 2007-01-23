@@ -553,8 +553,7 @@ function Render($strWikiContent)
 	// Sans PathInfo, il faut mettre un ? devant les liens vers les pages internes
 	if( $k_aConfig['UsePathInfo'] != 'true' )
 	{
-		//$strHtmlContent = preg_replace('/href="([^"]*)"/', 'href="?\1"', $strHtmlContent);
-		$strHtmlContent = preg_replace('/href="(.*)"/', 'href="?\1"', $strHtmlContent);
+		$strHtmlContent = preg_replace('/href="([^"]*)"/', 'href="?\1"', $strHtmlContent);
 		$strHtmlContent = preg_replace('/href="\?(\.\..*)"/', 'href="\1"', $strHtmlContent);
 		$strHtmlContent = preg_replace('/href="\?(\/.*)"/', 'href="\1"', $strHtmlContent);
 		$strHtmlContent = preg_replace('/href="\?([a-zA-Z]+:.*)"/', 'href="\1"', $strHtmlContent);
